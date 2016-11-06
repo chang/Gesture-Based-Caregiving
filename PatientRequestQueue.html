@@ -42,19 +42,11 @@
 	}
 
 	function name_spacing_y(d, i){
-		if (i <= (n_line-1)){
-			return name_top_pad*box_height;
-		} else {
-			return name_top_pad*box_height + Math.floor(i/4)*box_height + Math.floor(i/4)*(box_pad*box_height); // spacing = half of a box + # complete boxes + # padding 
-		}
+		return box_spacing_y(d, i) + name_top_pad * box_height;
 	}
 
 	function req_spacing_y(d, i){
-		if (i <= (n_line-1)){
-			return req_top_pad*box_height
-		} else {
-			return req_top_pad*box_height + Math.floor(i/4)*box_height + Math.floor(i/4)*(box_pad*box_height);
-		}
+		return name_spacing_y(d, i) + req_top_pad * box_height;
 	}
 
 
@@ -82,52 +74,58 @@
 	svg.selectAll("rect")
 	   .data(names)
 	   .enter()
-	   .append("rect")
-	   .attr("width", box_width)
-	   .attr("height", box_height)
-	   .attr("x", box_spacing_x)
-	   .attr("y", box_spacing_y)
-	   .attr("fill", color_wheel)
-	   .attr("opacity", .4);
+		   .append("rect")
+		   .attr("width", box_width)
+		   .attr("height", box_height)
+		   .attr("x", box_spacing_x)
+		   .attr("y", box_spacing_y)
+		   .attr("fill", color_wheel)
+		   .attr("opacity", .4);
 
 	//Patient label
 	svg.selectAll("text")
 		.data(names)
 		.enter()
-		.append("text")
-		.text(function(d){return d;})
-		.attr("font-family", font)
-		.attr("font-size", "20px")
-		.attr("x", text_spacing_x)
-		.attr("y", name_spacing_y)
-		.attr("text-anchor", "middle");
+			.append("text")
+			.text(function(d){return d;})
+			.attr("font-family", font)
+			.attr("font-size", "20px")
+			.attr("x", text_spacing_x)
+			.attr("y", name_spacing_y)
+			.attr("text-anchor", "middle");
 
 	svg.selectAll("text")
 		.data(requests)
-		.enter()
-		.append("text")
-		.text(function(d){return d;})
-		.attr("font-family", font)
-		.attr("font-size", "14px")
-		.attr("x", text_spacing_x)
-		.attr("y", req_spacing_y)
-		.attr("text-anchor", "middle");
+		.merge(svg.selectAll("text").data(requests))
+			.append("text")
+			.text(function(d){return d;})
+			.attr("font-family", font)
+			.attr("font-size", "14px")
+			.attr("x", text_spacing_x)
+			.attr("y", req_spacing_y)
+			.attr("text-anchor", "middle");
 
 
-	// Moving boxes and text
-	function animation(element){
-		svg.selectAll(element).transition()
-		.attr("y", TESTSPACING)
-		// .attr("width", 125)
-		.duration(1500);
-	}
-	animation("text");
-	animation("rect");
-
-	// // Disappearing boxes
-	// function update(data){
-
+	// // Moving boxes and text
+	// function animation(element){
+	// 	svg.selectAll(element).transition()
+	// 	.attr("y", TESTSPACING)
+	// 	// .attr("width", 125)
+	// 	.duration(1500);
 	// }
+	// animation("text");
+	// animation("rect");
+
+	// Disappearing boxes
+	function update(data){
+		var box = svg.selectAll("rect").data(data)
+
+		box.attr("class", "update");
+
+		box.exit().remove()
+	}
+	// update(names)
+	// update(names[2])
 	
 
 
