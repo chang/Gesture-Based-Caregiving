@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<head>
+	<title>d3.js</title>
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300" rel="stylesheet">
+</head>
+
+<style>
+.chart div{
+  font: 10px sans-serif;
+  background-color: steelblue;
+  text-align: right;
+  padding: 3px;
+  margin: 1px;
+  color: white;	
+}
+</style>
+
+<!-- <p></p>
+<script type="text/javascript">
+	d3.select("p")
+		.text(Math.floor(3.5))
+		.attr("font-size", "50px")
+</script> -->
+
+<body></body>
+<script>
+	var names = ["Patient A", "Eric" ,"Vibhor", "Abhilash", "Christian Bale", "Donald Trump",
+				   "Darth Vader", "Han Solo", "Some Dryer Lint", "Stuffs", "Vibhor2"];
+	var requests = ["pooped pants", "needs water", "needs a gin and tonic on the rocks", "pooped his pants and bed", "looking for a pet chicken"];
+
+
+	var box_height = 150;
+	var box_width = 150;
+	var n_line = 4; // number of cells per line
+	var name_top_pad = .2; // padding at top of cell as fraction of box_height
+	var req_top_pad = .4;
+	var box_pad = .1;
+
+	var font = "Open Sans"
+
+	//stackoverflow.com/questions/336859/javascript-function-declaration-syntax-var-fn-function-vs-function-fn
+	var spacing1 = function(d, i){
+		return i*box_width + box_width/10 - box_width/2;
+	}
+
+	function box_spacing_x(d, i){
+		return (i % n_line)*(1.1 * box_width);
+	}
+
+	function box_spacing_y(d, i){
+		return Math.floor(i/n_line) * (1.1 * box_height);
+	}
+
+	function TESTSPACING(d, i){
+		return Math.floor(i/n_line) * (1.1 * box_height) + 400;
+	}
+
+	function text_spacing_x(d, i){
+		return (i % n_line) * (1.1 * box_width) + .5 * box_width;	
+	}
+
+	function name_spacing_y(d, i){
+		if (i <= (n_line-1)){
+			return name_top_pad*box_height;
+		} else {
+			return name_top_pad*box_height + Math.floor(i/4)*box_height + Math.floor(i/4)*(box_pad*box_height); // spacing = half of a box + # complete boxes + # padding 
+		}
+	}
+
+	function req_spacing_y(d, i){
+		if (i <= (n_line-1)){
+			return req_top_pad*box_height
+		} else {
+			return req_top_pad*box_height + Math.floor(i/4)*box_height + Math.floor(i/4)*(box_pad*box_height);
+		}
+	}
+
+
+	function color_wheel(d, i){
+		var i = i % 4;
+		if (i == 0){
+			return "blue";
+		} else if (i == 1){
+			return "red";
+		} else if (i == 2){
+			return "purple";
+		} else {
+			return "yellow";
+		}
+	}
+
+	// Define the element as a variable so we can modify svg with
+	// svg.append("rect") instead of d3.select("svg").append("rect")
+	var svg = d3.select("body")
+				.append("svg")
+				.attr("width", box_width * 1.1 * n_line)
+				.attr("height", box_height * 10)
+
+	//bars
+	svg.selectAll("rect")
+	   .data(names)
+	   .enter()
+	   .append("rect")
+	   .attr("width", box_width)
+	   .attr("height", box_height)
+	   .attr("x", box_spacing_x)
+	   .attr("y", box_spacing_y)
+	   .attr("fill", color_wheel)
+	   .attr("opacity", .4);
+
+	//Patient label
+	svg.selectAll("text")
+		.data(names)
+		.enter()
+		.append("text")
+		.text(function(d){return d;})
+		.attr("font-family", font)
+		.attr("font-size", "20px")
+		.attr("x", text_spacing_x)
+		.attr("y", name_spacing_y)
+		.attr("text-anchor", "middle");
+
+	svg.selectAll("text")
+		.data(requests)
+		.enter()
+		.append("text")
+		.text(function(d){return d;})
+		.attr("font-family", font)
+		.attr("font-size", "14px")
+		.attr("x", text_spacing_x)
+		.attr("y", req_spacing_y)
+		.attr("text-anchor", "middle");
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<body>
+	<h1 style="font-family:Open Sans;">Patient Requests</h1>
+	<h2></h2>
+	<script>
+		d3.select("h2")
+			.text("Hello World");
+
+		var data = [4, 8, 15, 16, 23, 42];
+
+		var x = d3.scale.linear()
+		    .domain([0, d3.max(data)])
+		    .range([0, 420]);
+
+		d3.select(".chart")
+		  .selectAll("div")
+		    .data(data)
+		  .enter().append("div")
+		    .style("width", function(d) { return x(d) + "px"; })
+		    .text(function(d) { return d; });
+	</script>
+</body>
