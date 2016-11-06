@@ -1,0 +1,219 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Signed Finger Angle</title>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r67/three.js"></script>
+    <script src="//js.leapmotion.com/leap-0.6.2.js"></script>
+    <script src="//js.leapmotion.com/leap-plugins-0.1.6.1.js"></script>
+    <script src="//js.leapmotion.com/leap.rigged-hand-0.1.4.min.js"></script>
+    <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+
+
+
+    <style>
+      body{
+        font-family: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+      }
+      #output_rad, #output_deg{
+        font-size: 66px;
+        color: #005d98;
+        text-align: left;
+        position: fixed;
+        bottom: 18px;
+        cursor: pointer;
+      }
+      #output_rad{
+        display: none;
+      }
+
+      #progress {
+        background: #005d98;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        height: 16px;
+        width: 0%;
+      }
+      canvas{
+        z-index: -1;
+      }
+    </style>
+
+  </head>
+
+  <body>
+	<label for="name">Patient's Name: </label> <input id="name"></input><br>
+	<label for="room">Room Number: </label>	<input id="room"></input>
+	<button type="button" onclick="submit()">Submit</button>
+
+    <p>
+      Please indicate 'Health Emergency' with Fist Gesture<br>
+      Please inicate 'Bathroom Call' with Index Finger Gesture<br>
+      Please indicate 'General Nurse Call' with Two Finger Gesture
+    </p>
+    
+
+    <div id=output_rad></div>
+    <div id=output_deg></div>
+    <div id=progress></div>
+  </body>
+
+  <script type="text/javascript">
+	var submitted = 0;
+	var cgiPath = "cgi-bin/main1.cgi";
+	var patientJsonObject = 
+	{
+	name:
+	{
+		
+	},
+	room:
+	{
+		
+	},
+	call:
+	{
+		
+	}				
+	};
+	 var output_deg = document.getElementById('output_deg');
+	 var bathCall = 0, genCall = 0, emrCall = 0;
+	// Set up the controller:
+	Leap.loop({background: true}, {
+
+    hand: function(hand){
+
+      if(!hand.thumb.extended && !hand.indexFinger.extended && !hand.middleFinger.extended && !hand.ringFinger.extended && !hand.pinky.extended && emrCall == 0)
+	{
+	
+	patientJsonObject.call = 'Health Emergency';
+      	output_deg.innerHTML = 'Health Emergency Notification sent!';
+	emrCall = 1;
+	setTimeout(registerEmr, 15000);
+	var jsonObjStringToSend = JSON.stringify(patientJsonObject);
+	console.log("patientJsonObject string to write ", jsonObjStringToSend);
+    	$.ajax({
+        	type: "POST",
+        	url: "/notification.py"
+    	});
+	
+	window.localStorage.setItem("name", patientJsonObject.name)
+	window.localStorage.setItem("request", patientJsonObject.request)
+
+	var callValue = window.localStorage.getItem("out");
+	console.log("call is ",callValue);
+	}      
+	else if(!hand.thumb.extended && hand.indexFinger.extended && !hand.middleFinger.extended && !hand.ringFinger.extended && !hand.pinky.extended && bathCall == 0)
+	{
+	patientJsonObject.call = 'Bathroom Call';
+	
+	output_deg.innerHTML = 'Bathroom Call Notification sent!';
+	bathCall = 1;
+	setTimeout(registerBath, 15000);
+	
+	window.localStorage.setItem("name", patientJsonObject.name)
+	window.localStorage.setItem("request", patientJsonObject.request)
+	
+	}
+        else if(!hand.thumb.extended && hand.indexFinger.extended && hand.middleFinger.extended && !hand.ringFinger.extended && !hand.pinky.extended && genCall == 0)
+	{
+	patientJsonObject.call = 'General call';
+	output_deg.innerHTML = 'General Nurse Call Notification sent!';
+	genCall = 1;
+	setTimeout(registerGen, 15000);
+		var out = {}
+
+	window.localStorage.setItem("name", patientJsonObject.name)
+	window.localStorage.setItem("request", patientJsonObject.request)
+	
+
+	}
+	}
+  });
+
+
+	/*********************************************************
+	* End of the actual example
+	****************************************************/
+
+
+	/*********************************************************
+	* The rest of the code is here for visualizing the example. Feel
+	* free to remove it to experiment with the API value only
+	****************************************************/
+
+  // handle rad/deg UI
+
+  $('#output_rad, #output_deg').click(function(){
+    $('#output_rad, #output_deg').toggle();
+  });
+
+	// Adds the rigged hand and playback plugins
+	// to a given controller, providing a cool demo.
+	visualizeHand = function(controller){
+	  // The leap-plugin file included above gives us a number of plugins out of the box
+	  // To use a plugins, we call `.use` on the controller with options for the plugin.
+	  // See js.leapmotion.com/plugins for more info
+
+	  controller.use('playback', {
+		  // This is a compressed JSON file of preprecorded frame data
+		  recording: 'finger-angle-signed-47fps.json.lz',
+		  // How long, in ms, between repeating the recording.
+		  timeBetweenLoops: 1000,
+		  pauseOnHand: true
+	  }).on('riggedHand.meshAdded', function(handMesh, leapHand){
+		  handMesh.material.opacity = 1;
+	  });
+	  
+	  var overlay = controller.plugins.playback.player.overlay;
+	  overlay.style.right = 0;
+	  overlay.style.left = 'auto';
+	  overlay.style.top = 'auto';
+	  overlay.style.padding = 0;
+	  overlay.style.bottom = '13px';
+	  overlay.style.width = '180px';
+
+	
+	  controller.use('riggedHand', {
+		scale: 1.3,
+		boneColors: function (boneMesh, leapHand){
+		  if ((boneMesh.name.indexOf('Finger_') == 0) ) {
+        if ((boneMesh.name.indexOf('Finger_10') == 0) ||
+            (boneMesh.name.indexOf('Finger_20') == 0)
+            ) {
+          return {
+            hue: 0.564,
+            saturation: 1,
+            lightness: 0.5
+          }
+        }
+		  }
+		}
+	  });
+	  
+    var camera = controller.plugins.riggedHand.camera;
+    camera.position.set(-8,8,20);
+    camera.lookAt(new THREE.Vector3(0,0,0));
+	};
+	visualizeHand(Leap.loopController);
+
+function registerEmr()
+{
+	emrCall = 0;
+}
+function registerBath()
+{
+	bathCall = 0;
+}
+function registerGen()
+{
+	genCall = 0;
+}
+function submit()
+{
+	patientJsonObject.name = document.getElementById("name").value;
+	patientJsonObject.room = document.getElementById("room").value;
+	submitted = 1;
+}
+  </script>
+</html>
