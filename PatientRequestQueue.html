@@ -5,24 +5,6 @@
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300" rel="stylesheet">
 </head>
 
-<style>
-.chart div{
-  font: 10px sans-serif;
-  background-color: steelblue;
-  text-align: right;
-  padding: 3px;
-  margin: 1px;
-  color: white;	
-}
-</style>
-
-<!-- <p></p>
-<script type="text/javascript">
-	d3.select("p")
-		.text(Math.floor(3.5))
-		.attr("font-size", "50px")
-</script> -->
-
 <body></body>
 <script>
 	var names = ["Patient A", "Eric" ,"Vibhor", "Abhilash", "Christian Bale", "Donald Trump",
@@ -36,7 +18,6 @@
 	var name_top_pad = .2; // padding at top of cell as fraction of box_height
 	var req_top_pad = .4;
 	var box_pad = .1;
-
 	var font = "Open Sans"
 
 	//stackoverflow.com/questions/336859/javascript-function-declaration-syntax-var-fn-function-vs-function-fn
@@ -53,7 +34,7 @@
 	}
 
 	function TESTSPACING(d, i){
-		return Math.floor(i/n_line) * (1.1 * box_height) + 400;
+		return Math.floor(i/n_line) * (1.1 * box_height) + 100;
 	}
 
 	function text_spacing_x(d, i){
@@ -131,6 +112,23 @@
 		.attr("x", text_spacing_x)
 		.attr("y", req_spacing_y)
 		.attr("text-anchor", "middle");
+
+
+	// Moving boxes and text
+	function animation(element){
+		svg.selectAll(element).transition()
+		.attr("y", TESTSPACING)
+		// .attr("width", 125)
+		.duration(1500);
+	}
+	animation("text");
+	animation("rect");
+
+	// // Disappearing boxes
+	// function update(data){
+
+	// }
+	
 
 
 </script>
